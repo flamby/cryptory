@@ -201,7 +201,7 @@ class Cryptory():
             output['metric'] = metric
         return output.sort_values(by='date', ascending=self.ascending).reset_index(drop=True)
     
-    def extract_poloniex(self, coin1, coin2, coin1_col=False, coin2_col=False):
+    def extract_poloniex(self, coin1, coin2, coin1_col=False, coin2_col=False, period=None):
         """Retrieve the historical price of one coin relative to another (currency pair) from poloniex
         
         Parameters
@@ -214,16 +214,17 @@ class Cryptory():
             (default is False i.e. the column is not included)
         coin2_col : whether to include the coin2 code as a column
             (default is False i.e. the column is not included)
+        period : optional parameter, period in seconds (default is 86400 aka 1 day) choices are [300, 900, 1800, 7200, 14400, 86400] according to poloniex api documentation
             
         Returns
         -------
         pandas Dataframe
         """
-            
+        if period is None: period = 86400
         from_date = int(time.mktime(time.strptime(self.from_date, "%Y-%m-%d")))
         to_date = int(time.mktime(time.strptime(self.to_date, "%Y-%m-%d")))
-        url = "https://poloniex.com/public?command=returnChartData&currencyPair={}_{}&start={}&end={}&period=86400".format(
-                coin1.upper(), coin2.upper(), from_date, to_date)
+        url = "https://poloniex.com/public?command=returnChartData&currencyPair={}_{}&start={}&end={}&period={}".format(
+                coin1.upper(), coin2.upper(), from_date, to_date, period)
         try: 
             parsed_page = urlopen(url, timeout=self.timeout).read()
             parsed_page = parsed_page.decode("utf8")
